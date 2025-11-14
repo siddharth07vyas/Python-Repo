@@ -1,0 +1,27 @@
+# Credentials (don't upload to GitHub/Vercel)
+credentials.json
+convert_credentials.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+sheets/
+downloads/
+
+# Environment variables
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
