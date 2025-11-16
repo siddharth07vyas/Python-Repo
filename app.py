@@ -30,93 +30,121 @@ def extract_translations():
 
         worksheet = sheet.sheet1
         multilang_key = list(worksheet.col_values(1))
-        multilang_key = [key.strip() for key in multilang_key if key.strip()]
+        multilang_key = [key.strip() for key in multilang_key if key.strip()] ## skip blank keys
+        multilang_key = list(multilang_key)
+        multilang_key.pop(0)  # Remove default first header key
+        header_cols = worksheet.row_values(1)
+        header_cols = [col.strip() for col in header_cols if col.strip()]
+        header_cols = list(header_cols)
+        header_cols.remove("Slovak")
+       ## header_cols = list(map(lambda x: x.replace("Value", "English"), header_cols))
+        ## exclude first column which is keys
+        header_cols = header_cols[1:]
+        print(header_cols)
+        translation_key_values = {}
+
+ 
+
         
-        # Get column indices
-        eng_cell_index = worksheet.find("Value").col
-        german_cell_index = worksheet.find("German").col
-        hindi_cell_index = worksheet.find("Hindi").col
-        french_cell_index = worksheet.find("French").col
-        portuguese_cell_index = worksheet.find("Portugese").col
-        spanish_cell_index = worksheet.find("Spanish").col
-        rassian_cell_index = worksheet.find("Russian").col
-        italian_cell_index = worksheet.find("Italian").col
-        dutch_cell_index = worksheet.find("Dutch").col
-        chinese_cell_index = worksheet.find("Chinese(PRC)").col
-        japanese_cell_index = worksheet.find("Japanese").col
 
-        # Get column values
-        eng_cell_values = worksheet.col_values(eng_cell_index)
-        german_cell_values = worksheet.col_values(german_cell_index)
-        hindi_cell_values = worksheet.col_values(hindi_cell_index)
-        french_cell_values = worksheet.col_values(french_cell_index)
-        portuguese_cell_values = worksheet.col_values(portuguese_cell_index)
-        spanish_cell_values = worksheet.col_values(spanish_cell_index)
-        rassian_cell_values = worksheet.col_values(rassian_cell_index)
-        italian_cell_values = worksheet.col_values(italian_cell_index)
-        dutch_cell_values = worksheet.col_values(dutch_cell_index)
-        chinese_cell_values = worksheet.col_values(chinese_cell_index)
-        japanese_cell_values = worksheet.col_values(japanese_cell_index)
 
-        # Clean values
-        eng_cell_values = [cell.strip() for cell in eng_cell_values if cell.strip()]
-        german_cell_values = [cell.strip() for cell in german_cell_values if cell.strip()]
-        hindi_cell_values = [cell.strip() for cell in hindi_cell_values if cell.strip()]
-        french_cell_values = [cell.strip() for cell in french_cell_values if cell.strip()]
-        portuguese_cell_values = [cell.strip() for cell in portuguese_cell_values if cell.strip()]
-        spanish_cell_values = [cell.strip() for cell in spanish_cell_values if cell.strip()]
-        rassian_cell_values = [cell.strip() for cell in rassian_cell_values if cell.strip()]
-        italian_cell_values = [cell.strip() for cell in italian_cell_values if cell.strip()]
-        dutch_cell_values = [cell.strip() for cell in dutch_cell_values if cell.strip()]
-        chinese_cell_values = [cell.strip() for cell in chinese_cell_values if cell.strip()]
-        japanese_cell_values = [cell.strip() for cell in japanese_cell_values if cell.strip()]
+        for i, key in enumerate(header_cols):
+            key_index = worksheet.find(key).col
+            key_col_values = worksheet.col_values(key_index)
+            key_col_values = [cell.strip() for cell in key_col_values if cell.strip()]
+            key_value_multilang = dict(zip(multilang_key, key_col_values[1:]))
+            translation_key_values[key] =key_value_multilang
+        
 
-        # Create translations dictionaries
-        translation_en = {}
-        translation_gn = {}
-        translation_hi = {}
-        traslation_fr = {}
-        translation_pt = {}
-        translation_sk = {}
-        translation_es = {}
-        translation_ru = {}
-        translation_it = {}
-        translation_nl = {}
-        translation_cn = {}
-        translation_jp = {}
+        print(translation_key_values)
+        
 
-        for i, key in enumerate(multilang_key):
-            translation_en[key] = eng_cell_values[i] if i < len(eng_cell_values) else ""
-            translation_gn[key] = german_cell_values[i] if i < len(german_cell_values) else ""
-            translation_hi[key] = hindi_cell_values[i] if i < len(hindi_cell_values) else ""
-            traslation_fr[key] = french_cell_values[i] if i < len(french_cell_values) else ""
-            translation_pt[key] = portuguese_cell_values[i] if i < len(portuguese_cell_values) else ""
-            translation_es[key] = spanish_cell_values[i] if i < len(spanish_cell_values) else ""
-            translation_ru[key] = rassian_cell_values[i] if i < len(rassian_cell_values) else ""
-            translation_it[key] = italian_cell_values[i] if i < len(italian_cell_values) else ""
-            translation_nl[key] = dutch_cell_values[i] if i < len(dutch_cell_values) else ""
-            translation_cn[key] = chinese_cell_values[i] if i < len(chinese_cell_values) else ""
-            translation_jp[key] = japanese_cell_values[i] if i < len(japanese_cell_values) else ""
 
-        # Create final translations object
-        translations = {
-            "English": translation_en,
-            "German": translation_gn,
-            "Hindi": translation_hi,
-            "French": traslation_fr,
-            "Portuguese": translation_pt,
-            "Slovak": translation_sk,
-            "Spanish": translation_es,
-            "Russian": translation_ru,
-            "Italian": translation_it,
-            "Dutch": translation_nl,
-            "Chinese": translation_cn,
-            "Japanese": translation_jp,
-            "generated_at": datetime.now().isoformat(),
-            "total_keys": len(multilang_key)
-        }
+        # # Get column indices
+        # eng_cell_index = worksheet.find("Value").col
+        # german_cell_index = worksheet.find("German").col
+        # hindi_cell_index = worksheet.find("Hindi").col
+        # french_cell_index = worksheet.find("French").col
+        # portuguese_cell_index = worksheet.find("Portugese").col
+        # spanish_cell_index = worksheet.find("Spanish").col
+        # rassian_cell_index = worksheet.find("Russian").col
+        # italian_cell_index = worksheet.find("Italian").col
+        # dutch_cell_index = worksheet.find("Dutch").col
+        # chinese_cell_index = worksheet.find("Chinese(PRC)").col
+        # japanese_cell_index = worksheet.find("Japanese").col
 
-        return translations, None
+        # # Get column values
+        # eng_cell_values = worksheet.col_values(eng_cell_index)
+        # german_cell_values = worksheet.col_values(german_cell_index)
+        # hindi_cell_values = worksheet.col_values(hindi_cell_index)
+        # french_cell_values = worksheet.col_values(french_cell_index)
+        # portuguese_cell_values = worksheet.col_values(portuguese_cell_index)
+        # spanish_cell_values = worksheet.col_values(spanish_cell_index)
+        # rassian_cell_values = worksheet.col_values(rassian_cell_index)
+        # italian_cell_values = worksheet.col_values(italian_cell_index)
+        # dutch_cell_values = worksheet.col_values(dutch_cell_index)
+        # chinese_cell_values = worksheet.col_values(chinese_cell_index)
+        # japanese_cell_values = worksheet.col_values(japanese_cell_index)
+
+        # # Clean values
+        # eng_cell_values = [cell.strip() for cell in eng_cell_values if cell.strip()]
+        # german_cell_values = [cell.strip() for cell in german_cell_values if cell.strip()]
+        # hindi_cell_values = [cell.strip() for cell in hindi_cell_values if cell.strip()]
+        # french_cell_values = [cell.strip() for cell in french_cell_values if cell.strip()]
+        # portuguese_cell_values = [cell.strip() for cell in portuguese_cell_values if cell.strip()]
+        # spanish_cell_values = [cell.strip() for cell in spanish_cell_values if cell.strip()]
+        # rassian_cell_values = [cell.strip() for cell in rassian_cell_values if cell.strip()]
+        # italian_cell_values = [cell.strip() for cell in italian_cell_values if cell.strip()]
+        # dutch_cell_values = [cell.strip() for cell in dutch_cell_values if cell.strip()]
+        # chinese_cell_values = [cell.strip() for cell in chinese_cell_values if cell.strip()]
+        # japanese_cell_values = [cell.strip() for cell in japanese_cell_values if cell.strip()]
+
+        # # Create translations dictionaries
+        # translation_en = {}
+        # translation_gn = {}
+        # translation_hi = {}
+        # traslation_fr = {}
+        # translation_pt = {}
+        # translation_sk = {}
+        # translation_es = {}
+        # translation_ru = {}
+        # translation_it = {}
+        # translation_nl = {}
+        # translation_cn = {}
+        # translation_jp = {}
+
+        # for i, key in enumerate(multilang_key):
+        #     translation_en[key] = eng_cell_values[i] if i < len(eng_cell_values) else ""
+        #     translation_gn[key] = german_cell_values[i] if i < len(german_cell_values) else ""
+        #     translation_hi[key] = hindi_cell_values[i] if i < len(hindi_cell_values) else ""
+        #     traslation_fr[key] = french_cell_values[i] if i < len(french_cell_values) else ""
+        #     translation_pt[key] = portuguese_cell_values[i] if i < len(portuguese_cell_values) else ""
+        #     translation_es[key] = spanish_cell_values[i] if i < len(spanish_cell_values) else ""
+        #     translation_ru[key] = rassian_cell_values[i] if i < len(rassian_cell_values) else ""
+        #     translation_it[key] = italian_cell_values[i] if i < len(italian_cell_values) else ""
+        #     translation_nl[key] = dutch_cell_values[i] if i < len(dutch_cell_values) else ""
+        #     translation_cn[key] = chinese_cell_values[i] if i < len(chinese_cell_values) else ""
+        #     translation_jp[key] = japanese_cell_values[i] if i < len(japanese_cell_values) else ""
+
+        # # Create final translations object
+        # translations = {
+        #     "English": translation_en,
+        #     "German": translation_gn,
+        #     "Hindi": translation_hi,
+        #     "French": traslation_fr,
+        #     "Portuguese": translation_pt,
+        #     "Slovak": translation_sk,
+        #     "Spanish": translation_es,
+        #     "Russian": translation_ru,
+        #     "Italian": translation_it,
+        #     "Dutch": translation_nl,
+        #     "Chinese": translation_cn,
+        #     "Japanese": translation_jp,
+        #     "generated_at": datetime.now().isoformat(),
+        #     "total_keys": len(multilang_key)
+        # }
+
+        return translation_key_values, None
         
     except Exception as e:
         return None, str(e)
