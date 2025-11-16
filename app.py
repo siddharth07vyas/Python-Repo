@@ -17,24 +17,12 @@ def extract_translations():
         # Try to use environment variable first (for cloud deployment)
         credentials_json = os.getenv('GOOGLE_CREDENTIALS')
         if credentials_json:
-            try:
-                # Parse credentials from environment variable
-                credentials_info = json.loads(credentials_json)
-                creds = Credentials.from_service_account_info(credentials_info, scopes=scopes)
-                print("Using environment variable credentials")
-            except json.JSONDecodeError as e:
-                raise Exception(f"Invalid JSON in GOOGLE_CREDENTIALS environment variable: {str(e)}")
+            # Parse credentials from environment variable
+            credentials_info = json.loads(credentials_json)
+            creds = Credentials.from_service_account_info(credentials_info, scopes=scopes)
         else:
             # Fallback to file (for local development)
-            try:
-                if os.path.exists('credentials.json'):
-                    creds = Credentials.from_service_account_file('credentials.json', scopes=scopes)
-                    print("Using local credentials.json file")
-                else:
-                    raise FileNotFoundError("credentials.json file not found and GOOGLE_CREDENTIALS environment variable not set")
-            except Exception as e:
-                raise Exception(f"Error loading credentials from file: {str(e)}")
-        
+            creds = Credentials.from_service_account_file('credentials.json', scopes=scopes)
         client = gspread.authorize(creds)
 
         sheet_id = "1ylU7pHpN6iEy1v5Q5pDTg9Kr5_uzLsx4rPKKZrmRFmY"
@@ -130,22 +118,8 @@ def extract_translations():
 
         return translations, None
         
-    except FileNotFoundError as e:
-        error_msg = f"Credentials file not found: {str(e)}"
-        print(f"ERROR: {error_msg}")
-        return None, error_msg
-    except json.JSONDecodeError as e:
-        error_msg = f"Invalid JSON in credentials: {str(e)}"
-        print(f"ERROR: {error_msg}")
-        return None, error_msg
-    except gspread.exceptions.APIError as e:
-        error_msg = f"Google Sheets API error: {str(e)}"
-        print(f"ERROR: {error_msg}")
-        return None, error_msg
     except Exception as e:
-        error_msg = f"Unexpected error: {str(e)}"
-        print(f"ERROR: {error_msg}")
-        return None, error_msg
+        return None, str(e)
 
 @app.route('/')
 def home():
@@ -159,15 +133,23 @@ def extract():
         if error:
             return jsonify({
                 "success": False,
-                "error": error
+                "error": error,
             }), 500
         
-        # Return JSON directly (no file saving for serverless)
+        # Save to file
+        filename = f"translations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        filepath = os.path.join('downloads', filename)
+        
+        # Create downloads directory if it doesn't exist
+        os.makedirs('downloads', exist_ok=True)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(translations, f, ensure_ascii=False, indent=4)
+        
         return jsonify({
             "success": True,
             "message": "Translations extracted successfully!",
-            "data": translations,
-            "total_keys": translations.get("total_keys", 0)
+            "download_url": f"/download/{filename}"
         })
         
     except Exception as e:
@@ -176,30 +158,13 @@ def extract():
             "error": str(e)
         }), 500
 
-@app.route('/download/json')
-def download_json():
-    """Generate and download translations as JSON file"""
-    try:
-        translations, error = extract_translations()
-        
-        if error:
-            return jsonify({
-                "success": False,
-                "error": error
-            }), 500
-        
-        # Create JSON response for download
-        response = jsonify(translations)
-        response.headers['Content-Disposition'] = f'attachment; filename=translations_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
-        response.headers['Content-Type'] = 'application/json'
-        
-        return response
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+@app.route('/download/<filename>')
+def download_file(filename):
+    filepath = os.path.join('downloads', filename)
+    if os.path.exists(filepath):
+        return send_file(filepath, as_attachment=True)
+    else:
+        return "File not found", 404
 
 if __name__ == '__main__':
     # For local development

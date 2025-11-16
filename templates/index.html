@@ -184,8 +184,10 @@
                         <button onclick="downloadJSON()" class="download-btn">📥 Download JSON File</button>
                        
                     `;
-                    // Store data globally for download
-                    window.translationData = data.data;
+                   
+                    
+
+                    window.download_url = data.download_url
                 } else {
                     result.className = 'result error';
                     result.innerHTML = `
@@ -212,16 +214,13 @@
         }
         
         function downloadJSON() {
-            if (!window.translationData) {
-                alert('No data available to download');
+            if(!window.download_url) {
+                alert('No download URL available');
                 return;
             }
             
-            const dataStr = JSON.stringify(window.translationData, null, 4);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
+            link.href = window.download_url;
             link.download = `translations_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
             link.click();
         }
