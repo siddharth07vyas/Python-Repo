@@ -17,12 +17,24 @@ def extract_translations():
         # Try to use environment variable first (for cloud deployment)
         credentials_json = os.getenv('GOOGLE_CREDENTIALS')
         if credentials_json:
-            # Parse credentials from environment variable
-            credentials_info = json.loads(credentials_json)
-            creds = Credentials.from_service_account_info(credentials_info, scopes=scopes)
+            try:
+                # Parse credentials from environment variable
+                credentials_info = json.loads(credentials_json)
+                creds = Credentials.from_service_account_info(credentials_info, scopes=scopes)
+                print("Using environment variable credentials")
+            except json.JSONDecodeError as e:
+                raise Exception(f"Invalid JSON in GOOGLE_CREDENTIALS environment variable: {str(e)}")
         else:
             # Fallback to file (for local development)
-            creds = Credentials.from_service_account_file('credentials.json', scopes=scopes)
+            try:
+                if os.path.exists('credentials.json'):
+                    creds = Credentials.from_service_account_file('credentials.json', scopes=scopes)
+                    print("Using local credentials.json file")
+                else:
+                    raise FileNotFoundError("credentials.json file not found and GOOGLE_CREDENTIALS environment variable not set")
+            except Exception as e:
+                raise Exception(f"Error loading credentials from file: {str(e)}")
+        
         client = gspread.authorize(creds)
 
         sheet_id = "1ylU7pHpN6iEy1v5Q5pDTg9Kr5_uzLsx4rPKKZrmRFmY"
@@ -118,8 +130,22 @@ def extract_translations():
 
         return translations, None
         
+    except FileNotFoundError as e:
+        error_msg = f"Credentials file not found: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        return None, error_msg
+    except json.JSONDecodeError as e:
+        error_msg = f"Invalid JSON in credentials: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        return None, error_msg
+    except gspread.exceptions.APIError as e:
+        error_msg = f"Google Sheets API error: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        return None, error_msg
     except Exception as e:
-        return None, str(e)
+        error_msg = f"Unexpected error: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        return None, error_msg
 
 @app.route('/')
 def home():
