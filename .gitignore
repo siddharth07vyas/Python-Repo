@@ -1,6 +1,12 @@
-# Credentials (don't upload to GitHub/Vercel)
+# Credentials and sensitive files (NEVER commit these)
 credentials.json
+*credentials*.json
+*credential*
 convert_credentials.py
+get_service_email.py
+test_credentials.py
+*.key
+*.pem
 
 # Python
 __pycache__/
@@ -14,6 +20,7 @@ downloads/
 # Environment variables
 .env
 .env.local
+.env.production
 
 # OS
 .DS_Store
