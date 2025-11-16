@@ -149,7 +149,8 @@ def extract():
         return jsonify({
             "success": True,
             "message": "Translations extracted successfully!",
-            "download_url": f"/download/{filename}"
+            "download_url": f"/download/{filename}",
+            "data": translations
         })
         
     except Exception as e:
