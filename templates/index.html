@@ -181,8 +181,11 @@
                         <h3>✅ Success!</h3>
                         <p>${data.message}</p>
                         <p><strong>Total translations:</strong> ${data.total_keys}</p>
-                        <a href="${data.download_url}" class="download-btn">📥 Download JSON File</a>
+                        <button onclick="downloadJSON()" class="download-btn">📥 Download JSON File</button>
+                       
                     `;
+                    // Store data globally for download
+                    window.translationData = data.data;
                 } else {
                     result.className = 'result error';
                     result.innerHTML = `
@@ -207,6 +210,49 @@
             btn.textContent = '📄 Extract Translations';
             loading.style.display = 'none';
         }
+        
+        function downloadJSON() {
+            if (!window.translationData) {
+                alert('No data available to download');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(window.translationData, null, 4);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `translations_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            link.click();
+        }
+        
+        // function viewData() {
+        //     if (!window.translationData) {
+        //         alert('No data available to view');
+        //         return;
+        //     }
+            
+        //     const newWindow = window.open('', '_blank');
+        //     newWindow.document.write(`
+        //         <html>
+        //             <head>
+        //                 <title>Translation Data</title>
+        //                 <style>
+        //                     body { font-family: Arial, sans-serif; margin: 20px; }
+        //                     pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        //                     .header { background: #007bff; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+        //                 </style>
+        //             </head>
+        //             <body>
+        //                 <div class="header">
+        //                     <h2>📊 Translation Data</h2>
+        //                     <p>Generated: ${new Date().toLocaleString()}</p>
+        //                 </div>
+        //                 <pre>${JSON.stringify(window.translationData, null, 4)}</pre>
+        //             </body>
+        //         </html>
+        //     `);
+        // }
     </script>
 </body>
 </html>

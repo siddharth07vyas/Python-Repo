@@ -162,20 +162,12 @@ def extract():
                 "error": error
             }), 500
         
-        # Save to file
-        filename = f"translations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        filepath = os.path.join('downloads', filename)
-        
-        # Create downloads directory if it doesn't exist
-        os.makedirs('downloads', exist_ok=True)
-        
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(translations, f, ensure_ascii=False, indent=4)
-        
+        # Return JSON directly (no file saving for serverless)
         return jsonify({
             "success": True,
             "message": "Translations extracted successfully!",
-            "download_url": f"/download/{filename}"
+            "data": translations,
+            "total_keys": translations.get("total_keys", 0)
         })
         
     except Exception as e:
@@ -184,13 +176,30 @@ def extract():
             "error": str(e)
         }), 500
 
-@app.route('/download/<filename>')
-def download_file(filename):
-    filepath = os.path.join('downloads', filename)
-    if os.path.exists(filepath):
-        return send_file(filepath, as_attachment=True)
-    else:
-        return "File not found", 404
+@app.route('/download/json')
+def download_json():
+    """Generate and download translations as JSON file"""
+    try:
+        translations, error = extract_translations()
+        
+        if error:
+            return jsonify({
+                "success": False,
+                "error": error
+            }), 500
+        
+        # Create JSON response for download
+        response = jsonify(translations)
+        response.headers['Content-Disposition'] = f'attachment; filename=translations_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        response.headers['Content-Type'] = 'application/json'
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 if __name__ == '__main__':
     # For local development
