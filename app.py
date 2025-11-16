@@ -136,20 +136,20 @@ def extract():
                 "error": error,
             }), 500
         
-        # Save to file
-        filename = f"translations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        filepath = os.path.join('downloads', filename)
+        # # Save to file
+        # filename = f"translations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        # filepath = os.path.join('downloads', filename)
         
-        # Create downloads directory if it doesn't exist
-        os.makedirs('downloads', exist_ok=True)
+        # # Create downloads directory if it doesn't exist
+        # os.makedirs('downloads', exist_ok=True)
         
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(translations, f, ensure_ascii=False, indent=4)
+        # with open(filepath, 'w', encoding='utf-8') as f:
+        #     json.dump(translations, f, ensure_ascii=False, indent=4)
         
         return jsonify({
             "success": True,
             "message": "Translations extracted successfully!",
-            "download_url": f"/download/{filename}",
+
             "data": translations
         })
         
