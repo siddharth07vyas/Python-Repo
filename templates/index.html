@@ -159,6 +159,7 @@
     <div class="container">
         <h1>🌐 Translation Extractor</h1>
 
+        <input type="text" id="sheetIdInput" placeholder="Enter Google Sheet ID" style="width: 100%; padding: 10px; margin-bottom: 20px; font-size: 1rem;">
         <button id="extractBtn" class="extract-btn" onclick="extractTranslations()">
             📄 Extract Translations
         </button>
@@ -174,11 +175,21 @@
     </div>
 
     <script>
+        const sheetIdInput = document.getElementById('sheetIdInput');
+        sheetIdInput.addEventListener('input', function() {
+            const btn = document.getElementById('extractBtn');
+            btn.disabled = this.value.trim() === '';
+        });
+        if(document.getElementById('sheetIdInput').value.trim() === '') {
+            const btn = document.getElementById('extractBtn');
+            btn.disabled = true;
+        }
+
         async function extractTranslations() {
             const btn = document.getElementById('extractBtn');
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
-
+            const sheetId = document.getElementById('sheetIdInput').value.trim();
             // Show loading state
             btn.disabled = true;
             btn.textContent = 'Extracting...';
@@ -186,8 +197,9 @@
             result.style.display = 'none';
 
             try {
-                const response = await fetch('/extract', {
+                const response = await fetch(`/extract/${sheetId}`, {
                     method: 'POST',
+                    
                     headers: {
                         'Content-Type': 'application/json',
                     }

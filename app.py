@@ -7,7 +7,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-def extract_translations():
+def extract_translations(sheet_id):
     """Extract translations from Google Sheets"""
     try:
         scopes = [
@@ -25,7 +25,7 @@ def extract_translations():
             creds = Credentials.from_service_account_file('credentials.json', scopes=scopes)
         client = gspread.authorize(creds)
 
-        sheet_id = "1ylU7pHpN6iEy1v5Q5pDTg9Kr5_uzLsx4rPKKZrmRFmY"
+        sheet_id = sheet_id
         sheet = client.open_by_key(sheet_id)
 
         worksheet = sheet.sheet1
@@ -56,7 +56,7 @@ def extract_translations():
             translation_key_values[key] =key_value_multilang
         
 
-        print(translation_key_values)
+        print(type(translation_key_values))
         
 
 
@@ -153,10 +153,10 @@ def extract_translations():
 def home():
     return render_template('index.html')
 
-@app.route('/extract', methods=['POST'])
-def extract():
+@app.route('/extract/<sheet_id>', methods=['POST'])
+def extract(sheet_id):
     try:
-        translations, error = extract_translations()
+        translations, error = extract_translations(sheet_id)
         
         if error:
             return jsonify({
