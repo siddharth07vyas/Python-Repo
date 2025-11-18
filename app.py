@@ -34,13 +34,19 @@ def extract_translations(sheet_id):
         multilang_key = list(multilang_key)
         multilang_key.pop(0)  # Remove default first header key
         header_cols = worksheet.row_values(1)
+        print(f"🔍 Raw headers from sheet: {header_cols}")
+        
         header_cols = [col.strip() for col in header_cols if col.strip()]
         header_cols = list(header_cols)
-        header_cols.remove("Slovak")
+        print(f"🧹 Cleaned headers: {header_cols}")
+        
+      ##  header_cols.remove("Slovak")
        ## header_cols = list(map(lambda x: x.replace("Value", "English"), header_cols))
         ## exclude first column which is keys
         header_cols = header_cols[1:]
-        print(header_cols)
+        print(f"📋 Language headers to process: {header_cols}")
+        print(f"🔢 Total languages: {len(header_cols)}")
+        
         translation_key_values = {}
 
  
@@ -48,15 +54,38 @@ def extract_translations(sheet_id):
         
 
 
-        for i, key in enumerate(header_cols):
-            key_index = worksheet.find(key).col
-            key_col_values = worksheet.col_values(key_index)
+        # Process each language in the order they appear in the sheet
+        for i, language in enumerate(header_cols):
+            print(f"   📖 Processing {language}... ({i+1}/{len(header_cols)})")
+            
+            # Find column index for this language with error handling
+            try:
+                found_cell = worksheet.find(language)
+                if found_cell is None:
+                    print(f"   ❌ Language '{language}' not found in sheet")
+                    continue
+                
+                key_index = found_cell.col
+                key_col_values = worksheet.col_values(key_index)
+                print(f"   📊 Found {len(key_col_values)} values for {language}")
+                
+            except Exception as e:
+                print(f"   ❌ Error finding language '{language}': {str(e)}")
+                # Let's check what's actually in the sheet
+                print(f"   🔍 Available headers: {worksheet.row_values(1)}")
+                continue
+            
+            # Clean and prepare values
             key_col_values = [cell.strip() for cell in key_col_values if cell.strip()]
+            
+            # Create key-value mapping (skip header row with [1:])
             key_value_multilang = dict(zip(multilang_key, key_col_values[1:]))
-            translation_key_values[key] =key_value_multilang
+            
+            # Add to ordered dictionary
+            translation_key_values[language] = key_value_multilang
         
 
-        print(type(translation_key_values))
+       ## print(type(translation_key_values))
         
 
 
